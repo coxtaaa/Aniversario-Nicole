@@ -12,23 +12,25 @@ const API = Object.freeze({
 
 // Edite apenas esta lista para mudar os presentes exibidos no site.
 const PRESENTES_PREDEFINIDOS = [
-  { id: 'Tinta',    nome: 'Kit de tinta a óleo',          descricao: 'Um carinho simbólico para celebrar essa noite.',  icone: '✨' },
-  { id: 'Quadro', nome: 'Quadros (pintados ou não)',          descricao: 'Um presente para cuidados e momentos especiais.',  icone: '💄' },
-  { id: 'perfume',nome: 'Perfume doces',     descricao: 'Uma contribuição para o perfume escolhido pela debutante.',  icone: '🌸' },
-  { id: 'Livro',nome:'Livros (Romance ou filosofia)',        descricao: 'Um carinho para um dia de autocuidado e diversão.',  icone: '👑' },
-  { id: 'Pelucia', nome: 'Pelúcias',      descricao: 'Uma contribuição para criar novas memórias.',  icone: '✈️' },
-  { id: 'Acessórios',nome:'Acessórios (ouro)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: 'Salto',nome:'Salto (tamanho 36)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: 'Tenis',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: 'Grafite',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: 'Boneco',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: '1',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: '1',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: '1',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: '1',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: '1',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: '1',nome:'Tênis (tamanho 37)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' },
-  { id: 'surpresa-500',nome:'Acessórios (ouro)',      descricao: 'Uma contribuição especial para um grande desejo.',  icone: '🎁' }
+  { id: 'Tinta', nome: 'Kit de tinta a óleo', descricao: 'Para transformar criatividade em cores e dar vida a novas obras de arte.', icone: '🎨' },
+  { id: 'Quadro', nome: 'Quadros (pintados ou não)', descricao: 'Para decorar o cantinho dela ou servir de tela para novas criações.', icone: '🖼️' },
+  { id: 'perfume', nome: 'Perfumes doces', descricao: 'Uma fragrância doce e marcante para acompanhar momentos especiais.', icone: '🌸' },
+  { id: 'Livro', nome: 'Livros (romance ou filosofia)', descricao: 'Para viajar por grandes histórias, reflexões e novas ideias através da leitura.', icone: '📚' },
+  { id: 'Pelucia', nome: 'Pelúcias', descricao: 'Um presente fofo e aconchegante para fazer companhia e decorar o quarto.', icone: '🧸' },
+  { id: 'Acessórios', nome: 'Acessórios (ouro)', descricao: 'Um detalhe especial e elegante para complementar seus looks favoritos.', icone: '💍' },
+  { id: 'Salto', nome: 'Salto (tamanho 36)', descricao: 'Um toque de elegância para deixar ocasiões especiais ainda mais bonitas.', icone: '👠' },
+  { id: 'Tenis', nome: 'Tênis (tamanho 37)', descricao: 'Conforto e estilo para acompanhar a rotina e os passeios do dia a dia.', icone: '👟' },
+  { id: 'Grafite', nome: 'Kit de grafites e lapiseiras', descricao: 'Para desenhar, esboçar e colocar novas ideias no papel com ainda mais precisão.', icone: '✏️' },
+  { id: 'Boneco', nome: 'Action figure (Chainsaw Man)', descricao: 'Um item especial para a coleção de quem é fã do universo de Chainsaw Man.', icone: '🪚' },
+  { id: 'manga', nome: 'Mangás', descricao: 'Para aumentar a coleção e mergulhar em novas histórias e aventuras.', icone: '📖' },
+  { id: 'Canetas', nome: 'Canetas acrílicas', descricao: 'Mais cores e possibilidades para desenhos, pinturas e projetos criativos.', icone: '🖌️' },
+  { id: 'Pinceis', nome: 'Kit de pincéis', descricao: 'Novas ferramentas para explorar técnicas, detalhes e diferentes estilos de pintura.', icone: '🎨' },
+  { id: 'Imagens', nome: 'Imagens católicas', descricao: 'Um presente cheio de significado para representar e fortalecer sua fé.', icone: '🙏' },
+  { id: 'GiftCard', nome: 'Gift card (Xbox, leitura e Play Store)', descricao: 'Liberdade para escolher jogos, livros, aplicativos ou aquele conteúdo que ela está querendo.', icone: '🎮' },
+  { id: 'Vitrola', nome: 'Vitrola', descricao: 'Para curtir músicas favoritas de um jeito especial, clássico e cheio de personalidade.', icone: '🎶' },
+  { id: 'Dinheiro', nome: 'Dinheiro', descricao: 'Uma contribuição para ela escolher exatamente aquilo que deseja ou guardar para um sonho especial.', icone: '💵' },
+  { id: 'Pijamas', nome: 'Pijamas estilo macacão', descricao: 'Para noites mais confortáveis e divertidas, especialmente com um macacão de dinossauro.', icone: '🦖' }
+
 ];
 
 
