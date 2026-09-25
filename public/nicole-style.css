@@ -200,6 +200,51 @@ body { background: var(--royal-deep); color: var(--cream); font-family: 'Cormora
 .map-placeholder iframe { width:100%; height:220px; display:block; filter:hue-rotate(200deg) saturate(0.5) brightness(0.7); border:none; }
 .map-overlay { position:absolute; inset:0; background:rgba(10,26,92,0.3); pointer-events:none; }
 
+/* ── Pix ── */
+#pix {
+  position:relative; z-index:1; margin-top:48px; padding-top:34px;
+  border-top:1px solid rgba(201,168,76,0.16);
+  text-align:center;
+}
+.pix-card {
+  max-width:480px; margin:28px auto 0;
+  background:rgba(10,26,92,0.45); border:1px solid rgba(201,168,76,0.25);
+  border-radius:6px; padding:28px 24px;
+}
+.pix-photo-slot {
+  position:relative; width:100%; aspect-ratio:4 / 3;
+  border:1px dashed rgba(201,168,76,0.35); border-radius:6px;
+  overflow:hidden; background:rgba(6,15,58,0.75);
+}
+.pix-photo {
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.pix-photo-placeholder {
+  position:absolute; inset:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:8px; padding:18px;
+  text-align:center; background:
+    linear-gradient(135deg, rgba(6,15,58,0.8), rgba(10,26,92,0.88));
+  color:rgba(253,248,238,0.78);
+}
+.pix-photo-placeholder span {
+  font-family:'Cinzel',serif; font-size:12px; letter-spacing:3px;
+  text-transform:uppercase; color:var(--gold-light);
+}
+.pix-photo-placeholder small {
+  font-size:14px; line-height:1.5; font-style:italic;
+  color:rgba(253,248,238,0.62);
+}
+.pix-label {
+  font-family:'Cinzel',serif; font-size:10px; letter-spacing:4px;
+  color:var(--gold); text-transform:uppercase; margin-top:22px;
+}
+.pix-key {
+  margin-top:12px; padding:14px 16px; border-radius:3px;
+  border:1px solid rgba(201,168,76,0.28); background:rgba(6,15,58,0.75);
+  color:var(--cream); font-size:18px; line-height:1.6; word-break:break-word;
+}
+.pix-copy-btn { margin-top:18px; }
+
 /* ── RSVP ── */
 #rsvp {
   position:relative; z-index:1; padding:70px 24px;
@@ -319,7 +364,6 @@ footer {
 .gift-icon { font-size:28px; display:block; margin-bottom:10px; }
 .gift-name { font-family:'Cinzel',serif; font-size:12px; letter-spacing:2px; color:var(--gold-light); text-transform:uppercase; display:block; line-height:1.5; }
 .gift-description { display:block; font-size:15px; font-style:italic; color:rgba(253,248,238,.62); line-height:1.5; margin-top:7px; }
-.gift-value { display:block; font-family:'Cinzel',serif; font-size:18px; color:var(--gold-shine); margin-top:14px; }
 .gift-form-card {
   max-width:620px; margin:24px auto 0; padding:30px 26px;
   background:rgba(10,26,92,.45); border:1px solid rgba(201,168,76,.25); border-radius:6px;
@@ -342,5 +386,5 @@ footer {
 @media (max-width:560px) {
   .gift-grid { grid-template-columns:1fr; }
   .gift-form-card { padding:26px 20px; }
+  .pix-card { padding:24px 18px; }
 }
-

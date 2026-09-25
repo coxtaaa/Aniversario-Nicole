@@ -8,6 +8,7 @@ const PORT = Number(process.env.PORT || 3000);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const publicDir = path.resolve(__dirname, '../public');
+const projectRoot = path.resolve(__dirname, '..');
 
 app.disable('x-powered-by');
 
@@ -101,6 +102,14 @@ async function relaySuccessOrError(upstream, res, successBody = { ok: true }) {
 // Health check
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true });
+});
+
+// Configuração pública mínima do front-end.
+app.get('/api/site-config', (_req, res) => {
+  res.json({
+    ok: true,
+    pixKey: process.env.PIX_KEY?.trim() || null
+  });
 });
 
 // RSVP individual
@@ -339,6 +348,10 @@ app.use('/api', (_req, res) => {
 });
 
 // Front-end
+app.get('/pix-foto.jpg', (_req, res) => {
+  res.sendFile(path.join(projectRoot, 'pix-foto.jpg'));
+});
+
 app.use(express.static(publicDir));
 
 app.get('*', (_req, res) => {

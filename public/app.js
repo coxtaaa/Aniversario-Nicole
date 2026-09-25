@@ -7,8 +7,11 @@ const API = Object.freeze({
   FAMILIA: '/api/familia',
   FAMILIA_RSVP: '/api/familia/rsvp',
   FOTOS: '/api/fotos',
-  PRESENTES: '/api/presentes'
+  PRESENTES: '/api/presentes',
+  SITE_CONFIG: '/api/site-config'
 });
+
+let pixKeyValue = '';
 
 // Edite apenas esta lista para mudar os presentes exibidos no site.
 const PRESENTES_PREDEFINIDOS = [
@@ -77,6 +80,8 @@ if (document.getElementById('cd-days')) {
   setInterval(tick, 1000);
 }
 
+loadPixKey();
+
 // ── Toast ──
 function showToast(msg, error = false) {
   const t = document.getElementById('toast');
@@ -88,6 +93,64 @@ function showToast(msg, error = false) {
   t.style.color = error ? '#fff' : '#060f3a';
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+async function copyPixKey() {
+  const keyEl = document.getElementById('pix-key');
+  const key = (pixKeyValue || keyEl?.textContent || '').trim();
+
+  if (!key) {
+    showToast('Adicione a chave Pix antes de copiar.', true);
+    return;
+  }
+
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(key);
+    } else {
+      const temp = document.createElement('textarea');
+      temp.value = key;
+      temp.setAttribute('readonly', '');
+      temp.style.position = 'fixed';
+      temp.style.opacity = '0';
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand('copy');
+      temp.remove();
+    }
+
+    showToast('Chave Pix copiada para a área de transferência! ♛');
+  } catch (err) {
+    console.error('Erro ao copiar chave Pix:', err);
+    showToast('Não foi possível copiar a chave Pix.', true);
+  }
+}
+
+async function loadPixKey() {
+  const keyEl = document.getElementById('pix-key');
+  const copyBtn = document.querySelector('.pix-copy-btn');
+
+  if (!keyEl) return;
+
+  try {
+    const res = await fetch(API.SITE_CONFIG, { headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    const data = await res.json();
+    const key = typeof data?.pixKey === 'string' ? data.pixKey.trim() : '';
+
+    if (!key) {
+      throw new Error('Chave Pix não configurada.');
+    }
+
+    pixKeyValue = key;
+    keyEl.textContent = key;
+    if (copyBtn) copyBtn.disabled = false;
+  } catch (error) {
+    console.error('Erro ao carregar a chave Pix:', error);
+    keyEl.textContent = 'Chave Pix indisponível no momento.';
+    if (copyBtn) copyBtn.disabled = true;
+  }
 }
 
 // ── Confirmação individual (botões Sim/Não) ──
@@ -334,10 +397,6 @@ init();
 // ── Presentes ──
 let selectedGift = null;
 
-function formatBRL(value) {
-  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
 function renderGifts() {
   const grid = document.getElementById('gift-grid');
   if (!grid) return;
@@ -351,8 +410,7 @@ function renderGifts() {
     button.innerHTML = `
       <span class="gift-icon">${gift.icone}</span>
       <span class="gift-name">${gift.nome}</span>
-      <span class="gift-description">${gift.descricao}</span>
-      <span class="gift-value">${formatBRL(gift.valor)}</span>`;
+      <span class="gift-description">${gift.descricao}</span>`;
     button.addEventListener('click', () => selectGift(gift.id));
     grid.appendChild(button);
   });
@@ -366,7 +424,7 @@ function selectGift(giftId) {
 
   const selectedEl = document.getElementById('gift-selected');
   if (selectedEl && selectedGift) {
-    selectedEl.textContent = `${selectedGift.nome} — ${formatBRL(selectedGift.valor)}`;
+    selectedEl.textContent = selectedGift.nome;
   }
 
   document.getElementById('gift-form-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
