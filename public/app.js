@@ -480,6 +480,7 @@ async function submitGift() {
 renderGifts();
 
 // ── Gallery / Upload de fotos ──
+const MAX_PHOTOS = 4;
 let photos = [], lbIdx = 0;
 
 function handlePhotoUpload(e) {
@@ -491,7 +492,19 @@ function handlePhotoUpload(e) {
   const files = Array.from(e.target.files);
   if (files.length === 0) return;
 
-  const validFiles = files.filter(file => {
+  const availableSlots = MAX_PHOTOS - photos.length;
+  if (availableSlots <= 0) {
+    showToast(`A galeria permite no máximo ${MAX_PHOTOS} fotos.`, true);
+    e.target.value = '';
+    return;
+  }
+
+  const selectedFiles = files.slice(0, availableSlots);
+  if (files.length > availableSlots) {
+    showToast(`Você pode adicionar somente mais ${availableSlots} foto${availableSlots > 1 ? 's' : ''}.`, true);
+  }
+
+  const validFiles = selectedFiles.filter(file => {
     if (!file.type.startsWith('image/')) {
       showToast(`"${file.name}" não é uma imagem válida.`, true);
       return false;
@@ -599,7 +612,7 @@ function renderGallery() {
     grid.appendChild(c);
   });
 
-  for (let i = 0; i < Math.max(0, 6 - photos.length); i++) {
+  for (let i = 0; i < Math.max(0, MAX_PHOTOS - photos.length); i++) {
     const c = document.createElement('div');
     c.className = 'gallery-cell';
     c.textContent = '✦';

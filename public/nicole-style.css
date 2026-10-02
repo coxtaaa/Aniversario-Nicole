@@ -317,7 +317,7 @@ body { background: var(--royal-deep); color: var(--cream); font-family: 'Cormora
   text-align:center;
 }
 .gallery-note { font-size:15px; font-style:italic; color:rgba(253,248,238,0.5); max-width:340px; margin:16px auto 0; line-height:1.7; }
-.gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; max-width:480px; margin:28px auto 0; }
+.gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; max-width:480px; margin:28px auto 0; }
 .gallery-cell {
   aspect-ratio:1; background:rgba(10,26,92,0.5); border:1px dashed rgba(201,168,76,0.25);
   border-radius:3px; display:flex; align-items:center; justify-content:center;
