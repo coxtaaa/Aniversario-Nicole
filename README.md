@@ -89,6 +89,26 @@ Use `.env.example` como modelo público.
 | `POST /api/presentes` | `WEBHOOK_PRESENTES` |
 | `GET /api/health` | teste da própria API |
 
+### Payload do RSVP
+
+O formulário individual envia para `POST /api/rsvp` o payload padronizado:
+
+```json
+{
+  "nome": "João",
+  "sobrenome": "Silva",
+  "email": "joao@exemplo.com",
+  "telefone": "61999999999",
+  "status": "true"
+}
+```
+
+O valor de `status` é `"true"` para presença confirmada e `"false"` para ausência.
+O RSVP familiar envia `idGrupo`, `email`, `telefone`, `mensagem` e `confirmacoes`.
+As respostas do n8n são repassadas sem alteração de status HTTP ou corpo, no formato JSend
+(`successes`, `status` e `message`). O front-end apresenta a mensagem correspondente aos códigos
+`200`, `201`, `400`, `404`, `409`, `422`, `500`, `502` e `503`.
+
 Teste a API:
 
 ```powershell

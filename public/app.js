@@ -95,6 +95,27 @@ function showToast(msg, error = false) {
   setTimeout(() => t.classList.remove('show'), 4000);
 }
 
+const HTTP_MESSAGES = Object.freeze({
+  200: 'Confirmação registrada com sucesso.',
+  201: 'Dados atualizados com sucesso.',
+  400: 'Confira os dados preenchidos e tente novamente.',
+  404: 'Os dados foram enviados ao administrador para verificação manual.',
+  409: 'Encontramos um conflito. A confirmação precisa ser verificada manualmente.',
+  422: 'Não foi possível concluir: uma regra do evento impede esta ação.',
+  429: 'Muitas tentativas. Aguarde alguns segundos e tente novamente.',
+  500: 'O servidor encontrou um erro. Tente novamente mais tarde.',
+  502: 'Não foi possível comunicar com o serviço de confirmação.',
+  503: 'O serviço está temporariamente indisponível. Tente novamente mais tarde.'
+});
+
+async function readApiResponse(res) {
+  const contentType = res.headers.get('content-type') || '';
+  const body = contentType.includes('application/json') ? await res.json() : null;
+  const message = body?.message || body?.error || HTTP_MESSAGES[res.status] || 'Não foi possível concluir a operação.';
+
+  return { body, message };
+}
+
 async function copyPixKey() {
   const keyEl = document.getElementById('pix-key');
   const key = (pixKeyValue || keyEl?.textContent || '').trim();
@@ -193,8 +214,6 @@ async function submitIndividual() {
   const nomeEl     = document.getElementById('ind-nome');
   const emailEl    = document.getElementById('ind-email');
   const whatsappEl = document.getElementById('ind-whatsapp');
-  const mensagemEl = document.getElementById('ind-mensagem');
-  
   if (!nomeEl || !emailEl) {
     showToast('Elementos do formulário não encontrados.', true);
     return;
@@ -204,7 +223,6 @@ async function submitIndividual() {
   const sobrenome = document.getElementById('ind-sobrenome')?.value.trim() || '';
   const email     = emailEl.value.trim();
   const whatsapp  = whatsappEl?.value.trim() || '';
-  const mensagem  = mensagemEl?.value.trim() || '';
 
   if (!nome || !email || indConfirmacao === null) {
     showToast('Preencha nome, e-mail e confirmação.', true);
@@ -224,16 +242,23 @@ async function submitIndividual() {
     const res = await fetch(API.RSVP, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, sobrenome, email, whatsapp, confirmacao: indConfirmacao, mensagem })
+      body: JSON.stringify({
+        nome,
+        sobrenome,
+        email,
+        telefone: whatsapp,
+        status: indConfirmacao ? 'true' : 'false'
+      })
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { message } = await readApiResponse(res);
+    if (!res.ok) throw new Error(message);
 
-    showToast(indConfirmacao === true ? 'Presença confirmada! ♛ Até lá!' : 'Resposta registrada. Que pena, vai fazer falta!');
+    showToast(message || (indConfirmacao === true ? 'Presença confirmada! ♛ Até lá!' : 'Resposta registrada. Que pena, vai fazer falta!'));
     btn.textContent = 'Enviado ✓';
   } catch (err) {
     console.error('Erro ao enviar RSVP individual:', err);
-    showToast('Erro ao enviar. Tente novamente.', true);
+    showToast(err.message || 'Erro ao enviar. Tente novamente.', true);
     btn.textContent = 'Confirmar Presença ♛';
     btn.disabled = false;
   }
@@ -242,17 +267,14 @@ async function submitIndividual() {
 // ── RSVP Família — Submit ──
 async function submitFamilia() {
   const emailEl    = document.getElementById('fam-email');
-  const whatsappEl = document.getElementById('fam-whatsapp');
-  const mensagemEl = document.getElementById('fam-mensagem');
-  
+  const telefoneEl = document.getElementById('fam-telefone');
   if (!emailEl) {
     showToast('Elementos do formulário não encontrados.', true);
     return;
   }
 
   const email    = emailEl.value.trim();
-  const whatsapp = whatsappEl?.value.trim() || '';
-  const mensagem = mensagemEl?.value.trim() || '';
+  const telefone = telefoneEl?.value.trim() || '';
   const familiaId = new URLSearchParams(window.location.search).get('familia');
 
   if (!email) { 
@@ -291,16 +313,23 @@ async function submitFamilia() {
     const res = await fetch(API.FAMILIA_RSVP, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ familia_id: familiaId, email, whatsapp, mensagem, confirmacoes })
+      body: JSON.stringify({
+        idGrupo: familiaId,
+        email,
+        telefone,
+        mensagem: '',
+        confirmacoes
+      })
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { message } = await readApiResponse(res);
+    if (!res.ok) throw new Error(message);
 
-    showToast('Presenças confirmadas! ♛ Até lá!');
+    showToast(message || 'Presenças confirmadas! ♛ Até lá!');
     btn.textContent = 'Enviado ✓';
   } catch (err) {
     console.error('Erro ao enviar RSVP família:', err);
-    showToast('Erro ao enviar. Tente novamente.', true);
+    showToast(err.message || 'Erro ao enviar. Tente novamente.', true);
     btn.textContent = 'Confirmar Presenças ♛';
     btn.disabled = false;
   }
@@ -327,9 +356,9 @@ async function init() {
         'Accept': 'application/json'
       }
     });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { body: raw, message } = await readApiResponse(res);
+    if (!res.ok) throw new Error(message);
 
-    const raw = await res.json();
     console.log('✦ Resposta bruta do webhook:', JSON.stringify(raw, null, 2));
 
     // Suporta tanto array [ {...} ] quanto objeto direto { ... }
@@ -471,7 +500,7 @@ async function submitGift() {
     btn.textContent = 'Presente Registrado ✓';
   } catch (err) {
     console.error('Erro ao registrar presente:', err);
-    showToast('Erro ao registrar o presente. Tente novamente.', true);
+    showToast(err.message || 'Erro ao registrar o presente. Tente novamente.', true);
     btn.disabled = false;
     btn.textContent = 'Registrar Presente 🎁';
   }
@@ -575,14 +604,15 @@ async function submitPhotos() {
       body: formData
     });
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const { message } = await readApiResponse(res);
+    if (!res.ok) throw new Error(message);
 
     pendingPhotos.forEach(photo => { photo.status = 'sent'; });
     renderGallery();
     showToast(`${pendingPhotos.length} foto${pendingPhotos.length > 1 ? 's enviadas' : ' enviada'} com sucesso! ✦`);
   } catch (err) {
     console.error('Erro ao enviar fotos:', err);
-    showToast('Erro ao enviar as fotos. Tente novamente.', true);
+    showToast(err.message || 'Erro ao enviar as fotos. Tente novamente.', true);
     updatePhotoSendState();
   }
 }

@@ -76,6 +76,14 @@ function validEmail(value) {
     && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
 
+function apiError(res, status, message) {
+  return res.status(status).json({
+    successes: false,
+    status,
+    message,
+  });
+}
+
 async function requestN8n(url, options = {}, timeoutMs = 15_000) {
   return fetch(url, {
     ...options,
@@ -87,16 +95,28 @@ async function requestN8n(url, options = {}, timeoutMs = 15_000) {
   });
 }
 
-async function relaySuccessOrError(upstream, res, successBody = { ok: true }) {
+async function relayResponse(upstream, res, fallbackBody = {
+  successes: true,
+  status: 200,
+  message: 'Requisição processada.'
+}) {
+  const contentType = upstream.headers.get('content-type') || '';
+
   if (!upstream.ok) {
     console.error(`n8n respondeu HTTP ${upstream.status}`);
-    return res.status(502).json({
-      ok: false,
-      error: 'O serviço de automação não aceitou a requisição.'
-    });
   }
 
-  return res.status(200).json(successBody);
+  if (contentType.includes('application/json')) {
+    const body = await upstream.json();
+    return res.status(upstream.status).json(body);
+  }
+
+  const body = await upstream.text();
+  if (body) {
+    return res.status(upstream.status).type(contentType || 'text/plain').send(body);
+  }
+
+  return res.status(upstream.status).json(fallbackBody);
 }
 
 // Health check
@@ -116,27 +136,25 @@ app.get('/api/site-config', (_req, res) => {
 app.post('/api/rsvp', rateLimit({ max: 12 }), async (req, res) => {
   const webhook = getWebhook('WEBHOOK_RSVP');
   if (!webhook) {
-    return res.status(503).json({ ok: false, error: 'RSVP não configurado no servidor.' });
+    return apiError(res, 503, 'RSVP não configurado no servidor.');
   }
 
   const {
     nome,
     sobrenome = '',
     email,
-    whatsapp = '',
-    confirmacao,
-    mensagem = ''
+    telefone = '',
+    status
   } = req.body || {};
 
   if (
     !requiredText(nome, 120)
     || !validEmail(email)
-    || typeof confirmacao !== 'boolean'
+    || !['true', 'false'].includes(status)
     || !optionalTextIsValid(sobrenome, 120)
-    || !optionalTextIsValid(whatsapp, 40)
-    || !optionalTextIsValid(mensagem, 1500)
+    || !optionalTextIsValid(telefone, 40)
   ) {
-    return res.status(400).json({ ok: false, error: 'Dados de RSVP inválidos.' });
+    return apiError(res, 400, 'Dados de RSVP inválidos.');
   }
 
   try {
@@ -147,16 +165,15 @@ app.post('/api/rsvp', rateLimit({ max: 12 }), async (req, res) => {
         nome: nome.trim(),
         sobrenome: sobrenome.trim(),
         email: email.trim(),
-        whatsapp: whatsapp.trim(),
-        confirmacao,
-        mensagem: mensagem.trim()
+        telefone: telefone.trim(),
+        status
       })
     });
 
-    return relaySuccessOrError(upstream, res);
+    return relayResponse(upstream, res);
   } catch (error) {
     console.error('Erro ao encaminhar RSVP:', error.message);
-    return res.status(502).json({ ok: false, error: 'Falha de comunicação com o serviço de automação.' });
+    return apiError(res, 502, 'Falha de comunicação com o serviço de automação.');
   }
 });
 
@@ -164,13 +181,13 @@ app.post('/api/rsvp', rateLimit({ max: 12 }), async (req, res) => {
 app.get('/api/familia', rateLimit({ max: 30 }), async (req, res) => {
   const webhook = getWebhook('WEBHOOK_FAMILIA_GET');
   if (!webhook) {
-    return res.status(503).json({ ok: false, error: 'Busca de família não configurada no servidor.' });
+    return apiError(res, 503, 'Busca de família não configurada no servidor.');
   }
 
   const familiaId = typeof req.query.id === 'string' ? req.query.id.trim() : '';
 
   if (!/^[a-zA-Z0-9_-]{1,100}$/.test(familiaId)) {
-    return res.status(400).json({ ok: false, error: 'Identificador de família inválido.' });
+    return apiError(res, 400, 'Identificador de família inválido.');
   }
 
   try {
@@ -182,22 +199,14 @@ app.get('/api/familia', rateLimit({ max: 30 }), async (req, res) => {
       headers: { 'Accept': 'application/json' }
     });
 
-    if (!upstream.ok) {
-      console.error(`n8n família respondeu HTTP ${upstream.status}`);
-      return res.status(502).json({ ok: false, error: 'Não foi possível buscar a família.' });
-    }
-
-    const contentType = upstream.headers.get('content-type') || '';
-    const body = await upstream.text();
-
-    if (contentType.includes('application/json')) {
-      res.type('application/json');
-    }
-
-    return res.status(200).send(body);
+    return relayResponse(upstream, res, {
+      successes: true,
+      status: 200,
+      message: 'Família encontrada.',
+    });
   } catch (error) {
     console.error('Erro ao buscar família:', error.message);
-    return res.status(502).json({ ok: false, error: 'Falha de comunicação com o serviço de automação.' });
+    return apiError(res, 502, 'Falha de comunicação com o serviço de automação.');
   }
 });
 
@@ -205,13 +214,13 @@ app.get('/api/familia', rateLimit({ max: 30 }), async (req, res) => {
 app.post('/api/familia/rsvp', rateLimit({ max: 12 }), async (req, res) => {
   const webhook = getWebhook('WEBHOOK_FAMILIA_RSVP');
   if (!webhook) {
-    return res.status(503).json({ ok: false, error: 'RSVP de família não configurado no servidor.' });
+    return apiError(res, 503, 'RSVP de família não configurado no servidor.');
   }
 
   const {
-    familia_id,
+    idGrupo,
     email,
-    whatsapp = '',
+    telefone = '',
     mensagem = '',
     confirmacoes
   } = req.body || {};
@@ -227,13 +236,13 @@ app.post('/api/familia/rsvp', rateLimit({ max: 12 }), async (req, res) => {
     );
 
   if (
-    !requiredText(String(familia_id ?? ''), 100)
+    !requiredText(String(idGrupo ?? ''), 100)
     || !validEmail(email)
-    || !optionalTextIsValid(whatsapp, 40)
+    || !optionalTextIsValid(telefone, 40)
     || !optionalTextIsValid(mensagem, 1500)
     || !confirmacoesValidas
   ) {
-    return res.status(400).json({ ok: false, error: 'Dados da família inválidos.' });
+    return apiError(res, 400, 'Dados da família inválidos.');
   }
 
   try {
@@ -241,18 +250,18 @@ app.post('/api/familia/rsvp', rateLimit({ max: 12 }), async (req, res) => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        familia_id,
+        idGrupo,
         email: email.trim(),
-        whatsapp: whatsapp.trim(),
+        telefone: telefone.trim(),
         mensagem: mensagem.trim(),
         confirmacoes
       })
     });
 
-    return relaySuccessOrError(upstream, res);
+    return relayResponse(upstream, res);
   } catch (error) {
     console.error('Erro ao encaminhar RSVP da família:', error.message);
-    return res.status(502).json({ ok: false, error: 'Falha de comunicação com o serviço de automação.' });
+    return apiError(res, 502, 'Falha de comunicação com o serviço de automação.');
   }
 });
 
@@ -301,7 +310,7 @@ app.post('/api/presentes', rateLimit({ max: 10 }), async (req, res) => {
       })
     });
 
-    return relaySuccessOrError(upstream, res);
+    return relayResponse(upstream, res);
   } catch (error) {
     console.error('Erro ao encaminhar presente:', error.message);
     return res.status(502).json({ ok: false, error: 'Falha de comunicação com o serviço de automação.' });
@@ -334,7 +343,7 @@ app.post(
         body: req.body
       }, 60_000);
 
-      return relaySuccessOrError(upstream, res);
+      return relayResponse(upstream, res);
     } catch (error) {
       console.error('Erro ao encaminhar fotos:', error.message);
       return res.status(502).json({ ok: false, error: 'Falha de comunicação com o serviço de automação.' });
