@@ -58,7 +58,7 @@ npm start
 Depois acesse:
 
 ```text
-http://localhost:3000
+http://localhost:8080
 ```
 
 Não abra o `index.html` com duplo clique. O front-end deve ser servido pelo Node para que `/api/*` funcione.
@@ -130,7 +130,7 @@ As respostas do n8n são repassadas sem alteração de status HTTP ou corpo, no 
 Teste a API:
 
 ```powershell
-Invoke-RestMethod http://localhost:3000/api/health
+Invoke-RestMethod http://localhost:8080/api/health
 ```
 
 Resposta esperada:
