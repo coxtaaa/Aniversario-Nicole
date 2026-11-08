@@ -212,27 +212,12 @@ body { background: var(--royal-deep); color: var(--cream); font-family: 'Cormora
   border-radius:6px; padding:28px 24px;
 }
 .pix-photo-slot {
-  position:relative; width:100%; aspect-ratio:4 / 3;
+  position:relative; width:100%; aspect-ratio:1 / 1;
   border:1px dashed rgba(201,168,76,0.35); border-radius:6px;
-  overflow:hidden; background:rgba(6,15,58,0.75);
+  overflow:hidden; background:#fff;
 }
 .pix-photo {
-  width:100%; height:100%; object-fit:cover; display:block;
-}
-.pix-photo-placeholder {
-  position:absolute; inset:0; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:8px; padding:18px;
-  text-align:center; background:
-    linear-gradient(135deg, rgba(6,15,58,0.8), rgba(10,26,92,0.88));
-  color:rgba(253,248,238,0.78);
-}
-.pix-photo-placeholder span {
-  font-family:'Cinzel',serif; font-size:12px; letter-spacing:3px;
-  text-transform:uppercase; color:var(--gold-light);
-}
-.pix-photo-placeholder small {
-  font-size:14px; line-height:1.5; font-style:italic;
-  color:rgba(253,248,238,0.62);
+  width:100%; height:100%; object-fit:contain; display:block;
 }
 .pix-label {
   font-family:'Cinzel',serif; font-size:10px; letter-spacing:4px;

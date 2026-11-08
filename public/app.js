@@ -96,8 +96,8 @@ function showToast(msg, error = false) {
 }
 
 const HTTP_MESSAGES = Object.freeze({
-  200: 'Confirmação registrada com sucesso.',
-  201: 'Dados atualizados com sucesso.',
+  200: 'Dados atualizados com sucesso.',
+  201: 'Dados registrados com sucesso.',
   400: 'Confira os dados preenchidos e tente novamente.',
   404: 'Os dados foram enviados ao administrador para verificação manual.',
   409: 'Encontramos um conflito. A confirmação precisa ser verificada manualmente.',

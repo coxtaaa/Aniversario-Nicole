@@ -27,7 +27,8 @@ site_nicole_arquitetura_api/
 ├── server/
 │   └── server.js
 ├── .env
-├── .env.example
+├── .env.test
+├── .env.test.example
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -68,15 +69,32 @@ Durante desenvolvimento:
 npm run dev
 ```
 
-## .env
+## Ambientes e webhooks
 
-O `.env` agora é lido somente pelo Node. Ele não fica disponível no navegador.
+Os arquivos `.env` são lidos somente pelo Node. Eles não ficam disponíveis no navegador.
 
-Os três webhooks que já existiam no projeto foram mantidos no `.env`. Os webhooks de fotos e presentes continuam com os placeholders e precisam ser preenchidos quando esses fluxos existirem.
+O `.env` contém os webhooks de produção. O `.env.test` é usado por padrão nos comandos
+`start` e `dev` e deve conter somente webhooks de teste (`/webhook-test/...`).
+Preencha os valores locais a partir de `.env.test.example`.
 
-Nunca envie o `.env` para o GitHub. O `.gitignore` já o ignora.
+Nunca envie `.env` ou `.env.test` para o GitHub. O `.gitignore` já ignora os dois.
 
-Use `.env.example` como modelo público.
+Para trocar de teste para produção, altere uma linha em `package.json`:
+
+```json
+"start": "node --env-file=.env server/server.js"
+```
+
+Ou use os scripts prontos, sem editar o arquivo:
+
+```powershell
+npm start             # teste: .env.test
+npm run start:production
+npm run dev           # teste: .env.test
+npm run dev:production
+```
+
+Os webhooks de fotos e presentes também precisam ser preenchidos no ambiente em que forem usados.
 
 ## Rotas
 
