@@ -2,3 +2,10 @@ node_modules/
 .env
 *.log
 .DS_Store
+/webhooks nicole/
+/pix-foto.png/
+/.env.test/
+/"Documenta\303\247\303\243o/"/
+/.env.test/
+/pix-foto.png/
+/.env.test
